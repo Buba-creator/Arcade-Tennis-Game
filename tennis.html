@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Tennis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="script" href="../jQuery/jquery-3.3.1.min.map"> 
+    <style>
+  
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+
+
+    <script>
+    let fps=30;
+    let ballx=35; 
+    let ballSpeedx=10;
+    let ballY=35; 
+    let ballSpeedY=4;
+    let gameCanvas=document.getElementById('gameCanvas');
+    let context=gameCanvas.getContext("2d");
+    let mousePosX=0;
+    let mousePos1Y;
+    let mousePos2Y=300;
+    let PADDLE_WIDTH=10;
+    let PADDLE_HEIGHT=90;
+    let player1score=0;
+    let player2score=0;
+    const win_score=5;
+    let game_won=false;
+   
+    setInterval(drawPlaySpace,1000/fps);
+    setInterval(drawMovement,1000/fps);
+    function check(){
+        if(player1score >=win_score || player2score >=win_score){
+          game_won=true;
+        }
+    }
+    function comuputerControl(){
+        if(mousePos2Y+ (PADDLE_HEIGHT/2) < ballY-35){
+            mousePos2Y=mousePos2Y+12;
+        }else if (mousePos2Y+ (PADDLE_HEIGHT/2) > ballY+35){
+            mousePos2Y=mousePos2Y-12;
+        }
+    }
+    function ballReset(){
+        ballSpeedx=-ballSpeedx;
+         ballx=400;
+         ballY=300;
+        
+    }
+    function scoreReset(){
+         player1score=0;
+         player2score=0;
+    }
+    function mousePos(evt){ 
+              let rect=gameCanvas.getBoundingClientRect();
+             let mousex= evt.clientX-rect.left-30;
+             if(mousex > 385){
+                     mousex=385;
+             }
+             if(mousex < 10){
+                     mousex=10;
+             }
+             let mouseY= evt.clientY-rect.top-(PADDLE_HEIGHT/2);
+             if(mouseY >565){
+                     mouseY=565;
+             }
+     return{
+        X:mousex,
+        Y:mouseY
+     }}
+    addEventListener('mousemove',(evt)=>{
+         let mousepos=mousePos(evt)
+          
+          mousePos1Y=mousepos.Y;
+         
+    })
+   
+    addEventListener('click',(evt)=>{
+        scoreReset()
+        game_won=false;
+        
+    })
+ function drawMovement(){   
+    if(game_won){
+        context.fillText(player1score+'-'+player2score,360,240);
+      if(player1score>=win_score){  context.fillText('Player1 Wins,Click to Continue', 200, 200); }
+      if(player2score>=win_score){  context.fillText('Player2 Wins,Click to Continue', 400, 200); }
+        return
+    }
+     ballx=ballx+ballSpeedx;
+     ballY=ballY+ballSpeedY;
+     context.fillStyle="white";
+     context.beginPath();
+     context.arc(ballx,ballY, 7,0, Math.PI*2,true);
+     context.fill();
+     /*ball*/
+     if(ballx > 790){
+        if(ballY > mousePos2Y && ballY < mousePos2Y+PADDLE_HEIGHT){
+             ballSpeedx=-ballSpeedx;
+             let diff = mousePos2Y+(PADDLE_HEIGHT/2)-ballY;
+             ballSpeedY=diff*0.34;
+         }else{
+             player1score++
+             check();
+             ballReset()
+         
+        }
+     }
+     if(ballx < 10){
+         if(ballY > mousePos1Y && ballY < mousePos1Y+PADDLE_HEIGHT){
+             ballSpeedx=-ballSpeedx;
+             let diff = mousePos1Y+(PADDLE_HEIGHT/2)-ballY;
+             ballSpeedY=diff*0.34;
+         }else{  
+         player2score++
+         check()
+         ballReset()
+       
+        }
+     }
+     if(ballY > 600){
+         ballSpeedY=-ballSpeedY;
+     }
+     if(ballY < 0){
+         ballSpeedY=-ballSpeedY;
+     }
+     
+ }
+
+function drawPlaySpace(){
+    if(game_won){
+        return
+    }
+     comuputerControl();
+        context.fillStyle="black";
+        context.fillRect(0,0,800,600); 
+        context.fillStyle="white";
+        context.fillRect(mousePosX,mousePos1Y,PADDLE_WIDTH,PADDLE_HEIGHT);/*left paddle*/
+        context.fillStyle="white||dotted";
+        context.fillText(player1score, 100,100);  
+        context.fillRect(390,0,2,600);/*divide*/
+        context.fillStyle="white";
+        context.fillRect(800-PADDLE_WIDTH,mousePos2Y,PADDLE_WIDTH,PADDLE_HEIGHT);/*right paddle*/
+        context.fillText(player2score, 700, 100); 
+
+} 
+
+    
+    </script>
+    
+</body>
+</html>
